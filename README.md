@@ -1,2 +1,4 @@
 # practice_TRPZ_Vikings
-All project files will be stored here.
+## Our group:
+1. Milka Vladislav
+Add here your name
