@@ -1,7 +1,9 @@
 package ratings.document.table.tableview.impl.rating;
 
 import java.io.IOException;
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -18,6 +20,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Phrase;
+
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -77,11 +80,7 @@ public class RatingTable extends Table<Rating> {
 
 		autoResizeColumns();
 		sortPolicyProperty().set(t -> {
-		    Comparator<Rating> comparator = (a, b) -> {
-		    	return a.getConsolidatedScore() < b.getConsolidatedScore() ? 1 : -1;
-		    };
-		    FXCollections.sort(getItems(), comparator);
-
+			setItems(items());
 		    int i = 1;
 			for (Rating rating : getItems()) {
 				rating.setNumber(i++);
@@ -91,12 +90,74 @@ public class RatingTable extends Table<Rating> {
 		setRowFactory();
 	}
 
+	private void sortItems(List<Rating> items) {
+		Collections.sort(items, (a, b) -> {
+			if (a.getName() == null || b.getName() == null)
+				return -1;
+			return b.getName().compareTo(a.getName());
+		});
+
+		Collections.sort(items, (a, b) -> {
+	    	return a.getConsolidatedScore() < b.getConsolidatedScore() ? 1 : -1;
+	    });
+	}
+
+	private ObservableList<Rating> items() {
+		List<Rating> a = new ArrayList<>();
+		for (Rating item : getItems()) {
+			if (item.isSocialScholarship())
+				a.add(item);
+		}
+		sortItems(a);
+
+		List<Rating> b = new ArrayList<>();
+		for (Rating item : getItems()) {
+			if (!item.isSocialScholarship())
+				b.add(item);
+		}
+		sortItems(b);
+
+		ObservableList<Rating> list = FXCollections.observableArrayList();
+		a.forEach(e -> list.add(e));
+		b.forEach(e -> list.add(e));
+
+		return list;
+	}
+
 	private void setRowFactory() {
 		setRowFactory(new Callback<TableView<Rating>, TableRow<Rating>>() {
 			@Override
-			public TableRow<Rating> call(TableView<Rating> param) {
-				TableRow<Rating> row = new TableRow<>();
+			public TableRow<Rating> call(TableView<Rating> table) {
+				TableRow<Rating> row = new TableRow<Rating>() {
+					@Override
+                    protected void updateItem(Rating item, boolean empty) {
+						super.updateItem(item, empty);
+						if (!empty) {
+							if (item.isSocialScholarship()) {
+								setStyle("-fx-text-background-color: red");
+							} else {
+								setStyle("");
+							}
+
+							if (getContextMenu() != null) {
+								CheckMenuItem check = (CheckMenuItem) getContextMenu().getItems().get(0);
+								check.setSelected(item.isSocialScholarship());
+							}
+						}
+					}
+				};
+
 				ContextMenu menu = new ContextMenu();
+
+				CheckMenuItem social = new CheckMenuItem("Соціальна стипендія");
+				social.setOnAction(e -> {
+					row.getItem().setSocialScholarship(social.isSelected());
+					if (social.isSelected()) {
+						row.setStyle("-fx-text-background-color: red");
+					} else {
+						row.setStyle("");
+					}
+				});
 
 				CheckMenuItem remove = new CheckMenuItem("Видалити рядок");
 				remove.setOnAction(e -> {
@@ -108,7 +169,7 @@ public class RatingTable extends Table<Rating> {
 					}
 				});
 
-				menu.getItems().add(remove);
+				menu.getItems().addAll(social, remove);
 				row.setContextMenu(menu);
 
 				return row;
@@ -177,14 +238,14 @@ public class RatingTable extends Table<Rating> {
 		float averageScore = row.getAverageScore();
 		int allActivity = NumberUtils.getInteger(getAllActivityPercent(row));
 
-		return String.valueOf(NumberUtils.toFixed(((averageScore/(100 - allActivity)) * allActivity), 2));
+		return String.valueOf(NumberUtils.toFixed(((averageScore/(100 - allActivity)) * allActivity), 4));
 	}
 
 	private float calculateConsolidatedScore(Rating row) {
 		float averageScore = row.getAverageScore();
 		float score = Float.valueOf(row.getScore());
 
-		return NumberUtils.toFixed(averageScore + score, 2);
+		return NumberUtils.toFixed(averageScore + score, 4);
 	}
 
 	private Cell addCellToRow(Row row, int cellIndex, String value, Sheet sheet) {
@@ -233,14 +294,14 @@ public class RatingTable extends Table<Rating> {
 			addCellToRow(row, cellIndex++, item.getNumber(), sheet);
 			addCellToRow(row, cellIndex++, item.getName(), sheet);
 			addCellToRow(row, cellIndex++, item.getGroup(), sheet);
-			addCellToRow(row, cellIndex++, String.valueOf(NumberUtils.toFixed(item.getAverageScore(), 2)), sheet);
+			addCellToRow(row, cellIndex++, String.valueOf(NumberUtils.toFixed(item.getAverageScore(), 4)), sheet);
 			addCellToRow(row, cellIndex++, item.getSportActivityPercent(), sheet);
 			addCellToRow(row, cellIndex++, item.getCreativeActivityPercent(), sheet);
 			addCellToRow(row, cellIndex++, item.getCivilActivityPercent(), sheet);
 			addCellToRow(row, cellIndex++, item.getScientificActivityPercent(), sheet);
 			addCellToRow(row, cellIndex++, item.getPercent(), sheet);
 			addCellToRow(row, cellIndex++, item.getScore(), sheet);
-			addCellToRow(row, cellIndex++, String.valueOf(NumberUtils.toFixed(item.getConsolidatedScore(), 2)), sheet);
+			addCellToRow(row, cellIndex++, String.valueOf(NumberUtils.toFixed(item.getConsolidatedScore(), 4)), sheet);
 
 			cellIndex = 0;
 		}

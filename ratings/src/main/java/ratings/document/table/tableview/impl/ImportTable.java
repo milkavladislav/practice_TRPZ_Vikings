@@ -36,6 +36,12 @@ public class ImportTable extends Table<List<String>> {
 	 * Рядки с бюджетниками
 	 */
 	private List<List<String>> boldRows = new ArrayList<>();
+
+	/**
+	 * Рядки с соц. стипендией
+	 */
+	private List<List<String>> socialScholarshipRows = new ArrayList<>();
+
 	private List<List<TableItem>> headItems = new ArrayList<>();
 
 	private int numCols;
@@ -89,7 +95,9 @@ public class ImportTable extends Table<List<String>> {
 					row.add(item.getValue());
 
 					if (columnIndex == 1) { // name
-						if (item.isBold()) {
+						if (item.isSocial()) {
+							socialScholarshipRows.add(row);
+						} else if (item.isBold()) {
 							boldRows.add(row);
 						}
 					}
@@ -125,16 +133,20 @@ public class ImportTable extends Table<List<String>> {
 						super.updateItem(item, empty);
 
 						if (!empty) {
-							if (boldRows.contains(item))
+							if (socialScholarshipRows.contains(item)) {
+								setStyle("-fx-text-background-color: red");
+							} else if (boldRows.contains(item)) {
 								setStyle("-fx-font-weight: bold");
-							else
-								setStyle("-fx-font-weight: normal");
+							} else {
+								setStyle("");
+							}
 
 							if (getContextMenu() != null) {
-								CheckMenuItem check = (CheckMenuItem) getContextMenu().getItems().get(0);
-								if (!check.isSelected()) {
-									check.setSelected(boldRows.contains(item));
-								}
+								CheckMenuItem socialCheck = (CheckMenuItem) getContextMenu().getItems().get(1);
+								CheckMenuItem boldCheck = (CheckMenuItem) getContextMenu().getItems().get(0);
+
+								socialCheck.setSelected(socialScholarshipRows.contains(item));
+								boldCheck.setSelected(boldRows.contains(item));
 							}
 						}
 					}
@@ -144,19 +156,55 @@ public class ImportTable extends Table<List<String>> {
 
 				CheckMenuItem free = new CheckMenuItem("Виділити бюджетника");
 				free.setOnAction(e -> {
+					menu.getItems().forEach(item -> {
+						if (item instanceof CheckMenuItem) {
+							CheckMenuItem checkItem = (CheckMenuItem) item;
+							if (!checkItem.equals(free)) {
+								checkItem.setSelected(false);
+							}
+						}
+					});
+
 					if (free.isSelected()) {
 						boldRows.add(row.getItem());
+						socialScholarshipRows.remove(row.getItem());
+
 						row.setStyle("-fx-font-weight: bold");
 					} else {
 						boldRows.remove(row.getItem());
-						row.setStyle("-fx-font-weight: normal");
+						row.setStyle("");
+					}
+				});
+
+				CheckMenuItem social = new CheckMenuItem("Соціальна стипендія");
+				social.setOnAction(e -> {
+					menu.getItems().forEach(item -> {
+						if (item instanceof CheckMenuItem) {
+							CheckMenuItem checkItem = (CheckMenuItem) item;
+							if (!checkItem.equals(social)) {
+								checkItem.setSelected(false);
+							}
+						}
+					});
+
+					if (social.isSelected()) {
+						socialScholarshipRows.add(row.getItem());
+						boldRows.remove(row.getItem());
+
+						row.setStyle("-fx-text-background-color: red");
+					} else {
+						socialScholarshipRows.remove(row.getItem());
+						row.setStyle("");
 					}
 				});
 
 				CheckMenuItem remove = new CheckMenuItem("Видалити рядок");
 				remove.setOnAction(e -> {
 					List<String> selectedItem = table.getSelectionModel().getSelectedItem();
+
 					boldRows.remove(selectedItem);
+					socialScholarshipRows.remove(selectedItem);
+
 				    table.getItems().remove(selectedItem);
 
 				    int i = 1;
@@ -165,7 +213,7 @@ public class ImportTable extends Table<List<String>> {
 					}
 				});
 
-				menu.getItems().addAll(free, remove);
+				menu.getItems().addAll(free, social, remove);
 
 				row.setContextMenu(menu);
 				return row;
@@ -225,7 +273,7 @@ public class ImportTable extends Table<List<String>> {
     		averageScore += NumberUtils.getInteger(row.get(i));
     	}
 
-    	return NumberUtils.toFixed(averageScore / indexes.size(), 2);
+    	return NumberUtils.toFixed(averageScore / indexes.size(), 4);
     }
 
     @Override
@@ -310,6 +358,10 @@ public class ImportTable extends Table<List<String>> {
 
     public List<List<String>> getBoldRows() {
     	return boldRows;
+    }
+
+    public List<List<String>> getSocialScholarshipRows() {
+    	return socialScholarshipRows;
     }
 
 	@Override

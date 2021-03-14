@@ -33,18 +33,29 @@ public class WorksheetsParser {
 		private static final long serialVersionUID = 3135734525412681072L;
 
 		private boolean bold;
+		private boolean social;
 		private String value;
 
-		public TableItem(boolean bold, String value) {
+		public TableItem(boolean bold, boolean social, String value) {
 			this.bold = bold;
+			this.social = social;
 			this.value = value;
 		}
+
 		public boolean isBold() {
 			return bold;
 		}
 
 		public void setBold(boolean bold) {
 			this.bold = bold;
+		}
+
+		public boolean isSocial() {
+			return social;
+		}
+
+		public void setSocial(boolean social) {
+			this.social = social;
 		}
 
 		public String getValue() {
@@ -71,7 +82,7 @@ public class WorksheetsParser {
 				str = str.replaceAll(".0", "");
 
 				boolean isBold = excel.getFontAt(cell.getCellStyle().getFontIndexAsInt()).getBold();
-				cells.add(new TableItem(isBold, str));
+				cells.add(new TableItem(isBold, false, str));
 			}
 
 			rows.add(cells);
@@ -82,7 +93,7 @@ public class WorksheetsParser {
 		for (List<TableItem> row : rows) {
 			if (row.size() < rowSize) {
 				for (int i = row.size(); i < rowSize; i++) {
-					row.add(new TableItem(false, ""));
+					row.add(new TableItem(false, false, ""));
 				}
 			}
 		}

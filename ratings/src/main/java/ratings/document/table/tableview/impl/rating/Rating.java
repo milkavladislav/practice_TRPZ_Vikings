@@ -61,6 +61,11 @@ public class Rating implements Serializable {
 	 */
 	private float consolidatedScore;
 
+	/**
+	 * Соц. стипендия
+	 */
+	private boolean socialScholarship;
+
 	public void setField(String field, String newValue) {
 		switch (field) {
 			case "name":
@@ -172,5 +177,13 @@ public class Rating implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public boolean isSocialScholarship() {
+		return socialScholarship;
+	}
+
+	public void setSocialScholarship(boolean socialScholarship) {
+		this.socialScholarship = socialScholarship;
 	}
 }

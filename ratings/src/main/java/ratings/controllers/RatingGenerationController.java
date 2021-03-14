@@ -78,6 +78,7 @@ public class RatingGenerationController implements Initializable {
 		public String group;
 		public float averageScore;
 		public List<String> row;
+		public boolean social;
 	}
 
 	private String getGroup(ImportTable table) {
@@ -101,28 +102,34 @@ public class RatingGenerationController implements Initializable {
 		}
 	}
 
+	private void addAllRows(List<Item> allItems, ImportTable table) {
+		for (List<String> row : table.getBoldRows()) {
+			Item item = new Item();
+
+			item.group = getGroup(table);
+			item.averageScore = table.getAverageScoreByRow(row);
+			item.row = row;
+
+			allItems.add(item);
+		}
+
+		for (List<String> row : table.getSocialScholarshipRows()) {
+			Item item = new Item();
+
+			item.group = getGroup(table);
+			item.averageScore = table.getAverageScoreByRow(row);
+			item.row = row;
+			item.social = true;
+
+			allItems.add(item);
+		}
+	}
+
 	private ObservableList<Rating> prepareTableItems() {
 		List<Item> allItems = new ArrayList<>();
 
-		selectedTables.getKey().getBoldRows().forEach(e -> {
-			Item item = new Item();
-
-			item.group = getGroup(selectedTables.getKey());
-			item.averageScore = selectedTables.getKey().getAverageScoreByRow(e);
-			item.row = e;
-
-			allItems.add(item);
-		});
-
-		selectedTables.getValue().getBoldRows().forEach(e -> {
-			Item item = new Item();
-
-			item.group = getGroup(selectedTables.getValue());
-			item.averageScore = selectedTables.getValue().getAverageScoreByRow(e);
-			item.row = e;
-
-			allItems.add(item);
-		});
+		addAllRows(allItems, selectedTables.getKey());
+		addAllRows(allItems, selectedTables.getValue());
 
 		ObservableList<Rating> items = FXCollections.observableArrayList();
 		int i = 1;
@@ -134,6 +141,7 @@ public class RatingGenerationController implements Initializable {
 			rating.setGroup(item.group);
 			rating.setAverageScore(item.averageScore);
 			rating.setConsolidatedScore(item.averageScore);
+			rating.setSocialScholarship(item.social);
 
 			items.add(rating);
 		}

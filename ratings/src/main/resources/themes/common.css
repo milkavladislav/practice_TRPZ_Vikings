@@ -28,7 +28,6 @@
 
 .tab-pane {
   -fx-min-height: 28px;
-  -fx-max-height: 28px;
 }
 
 .table-view .table-cell {

@@ -55,7 +55,10 @@ public class DocumentsData implements Serializable {
 					List<TableItem> tableItems = new ArrayList<>();
 
 					item.forEach(e -> {
-						tableItems.add(new TableItem(importTable.getBoldRows().contains(item), e));
+						boolean isBold = importTable.getBoldRows().contains(item);
+						boolean social = importTable.getSocialScholarshipRows().contains(item);
+
+						tableItems.add(new TableItem(social || isBold, social, e));
 					});
 
 					items.add(tableItems);
