@@ -37,7 +37,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 
 import javafx.util.Callback;
-
+import ratings.alerts.Alert;
 import ratings.document.table.tableview.Table;
 import ratings.utils.NumberUtils;
 
@@ -62,7 +62,7 @@ public class RatingTable extends Table<Rating> {
 
 		getColumns().add(createColumn("№", "number", false, false));
 
-		getColumns().add(createColumn("Прізвище, ім’я, по батькові", "name", true, true));
+		getColumns().add(createColumn("Прізвище, ім’я, по батькові", "name", false, true));
 		getColumns().add(createColumn("Група", "group", true, true));
 		getColumns().add(createColumn("Середній бал", "averageScore", true, false));
 
@@ -118,6 +118,7 @@ public class RatingTable extends Table<Rating> {
 		sortItems(b);
 
 		ObservableList<Rating> list = FXCollections.observableArrayList();
+
 		a.forEach(e -> list.add(e));
 		b.forEach(e -> list.add(e));
 
@@ -133,11 +134,7 @@ public class RatingTable extends Table<Rating> {
                     protected void updateItem(Rating item, boolean empty) {
 						super.updateItem(item, empty);
 						if (!empty) {
-							if (item.isSocialScholarship()) {
-								setStyle("-fx-text-background-color: red");
-							} else {
-								setStyle("");
-							}
+							setStyle(item.isSocialScholarship() ? "-fx-text-background-color: red" : "");
 
 							if (getContextMenu() != null) {
 								CheckMenuItem check = (CheckMenuItem) getContextMenu().getItems().get(0);
@@ -152,11 +149,7 @@ public class RatingTable extends Table<Rating> {
 				CheckMenuItem social = new CheckMenuItem("Соціальна стипендія");
 				social.setOnAction(e -> {
 					row.getItem().setSocialScholarship(social.isSelected());
-					if (social.isSelected()) {
-						row.setStyle("-fx-text-background-color: red");
-					} else {
-						row.setStyle("");
-					}
+					row.setStyle(social.isSelected() ? "-fx-text-background-color: red" : "");
 				});
 
 				CheckMenuItem remove = new CheckMenuItem("Видалити рядок");
@@ -214,8 +207,20 @@ public class RatingTable extends Table<Rating> {
 		activity.setOnEditCommit(e -> {
 			Rating row = getItems().get(e.getTablePosition().getRow());
 
+			if (NumberUtils.isNumeric(e.getNewValue())) {
+				if (Integer.valueOf(e.getNewValue()) < 0) {
+					Alert.show("Увага!", "Помилка при введенні поля " + activity.getId(),
+							"Поле може приймати тільки додатні значення");
+
+					refresh();
+					autoResizeColumns();
+					return;
+				}
+			}
+
 			row.setField(property, e.getNewValue());
-			row.setPercent(getAllActivityPercent(row));
+
+			row.setPercent(String.valueOf(getAllActivityPercent(row)));
 			row.setScore(calculateScore(row));
 			row.setConsolidatedScore(calculateConsolidatedScore(row));
 
@@ -226,19 +231,21 @@ public class RatingTable extends Table<Rating> {
 		return activity;
 	}
 
-	private String getAllActivityPercent(Rating row) {
-		return Integer.toString(
+	private int getAllActivityPercent(Rating row) {
+		int result =
 			NumberUtils.getInteger(row.getCivilActivityPercent()) +
 			NumberUtils.getInteger(row.getCreativeActivityPercent()) +
 			NumberUtils.getInteger(row.getSportActivityPercent()) +
-			NumberUtils.getInteger(row.getScientificActivityPercent()));
+			NumberUtils.getInteger(row.getScientificActivityPercent());
+		return result > 10 ? 10 : result;
 	}
 
 	private String calculateScore(Rating row) {
 		float averageScore = row.getAverageScore();
-		int allActivity = NumberUtils.getInteger(getAllActivityPercent(row));
+		int allActivity = getAllActivityPercent(row);
 
-		return String.valueOf(NumberUtils.toFixed(((averageScore/(100 - allActivity)) * allActivity), 4));
+		float score = (averageScore * allActivity) / 100.0F;//(averageScore/(100 - allActivity)) * allActivity;
+		return String.valueOf(NumberUtils.toFixed(score, 4));
 	}
 
 	private float calculateConsolidatedScore(Rating row) {
@@ -250,17 +257,21 @@ public class RatingTable extends Table<Rating> {
 
 	private Cell addCellToRow(Row row, int cellIndex, String value, Sheet sheet) {
 		Cell cell = row.createCell(cellIndex);
+
 		cell.setCellValue(value);
 		setCellBorder(CellRangeAddress.valueOf(cell.getAddress().formatAsString()), sheet);
 		sheet.autoSizeColumn(cellIndex);
+
 		return cell;
 	}
 
 	private Cell addCellToRow(Row row, int cellIndex, double value, Sheet sheet) {
 		Cell cell = row.createCell(cellIndex);
+
 		cell.setCellValue(value);
 		setCellBorder(CellRangeAddress.valueOf(cell.getAddress().formatAsString()), sheet);
 		sheet.autoSizeColumn(cellIndex);
+
 		return cell;
 	}
 
@@ -323,14 +334,14 @@ public class RatingTable extends Table<Rating> {
 				1300, // №
 				8700, // Прізвище, ім’я, по батькові
 				1300, // Група
-				1700, // Середній бал
+				2000, // Середній бал
 				1300, // Спортивна діяльність
 				1300, // Творча діяльність
 				1300, // Громадянська діяльність
 				1300, // Наукова діяльність
 				1400, // Всього, додано балів (%)
 				1400, // Всього, додано балів (бал)
-				1700  // Консолідований бал
+				2000  // Консолідований бал
 			});
 
 			for (TableColumn<Rating, ?> column : getColumns()) {

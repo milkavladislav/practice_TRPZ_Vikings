@@ -12,9 +12,7 @@ import javafx.scene.control.Tab;
 
 import ratings.document.Document;
 import ratings.document.DocumentsManager;
-
 import ratings.document.serialize.data.TabData;
-
 import ratings.document.table.tableview.Table;
 import ratings.document.table.tableview.TableType;
 import ratings.document.table.tableview.impl.ImportTable;
@@ -112,10 +110,6 @@ public class DocumentsData implements Serializable {
 		}
 	}
 
-	public TabData[] getTabs() {
-		return tabs;
-	}
-
 	@SuppressWarnings("unchecked")
 	public void initAllDocuments() {
 		if (documents == null)
@@ -143,6 +137,10 @@ public class DocumentsData implements Serializable {
 				}
 			}
 		}
+	}
+
+	public TabData[] getTabs() {
+		return tabs;
 	}
 
 	public void initAppSettings() {

@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 import ratings.document.Document;
+import ratings.utils.NumberUtils;
 
 public abstract class Table<T> extends TableView<T> implements Exportable {
 
@@ -34,7 +35,16 @@ public abstract class Table<T> extends TableView<T> implements Exportable {
 		setCursor(Cursor.HAND);
 	}
 
-	public void autoResizeColumns() {
+	protected boolean isScore(String str) {
+		if (NumberUtils.isNumeric(str)) {
+			float num = Float.valueOf(str);
+			return num >= 0 && num <= 12;
+		}
+
+		return false;
+	}
+
+	protected void autoResizeColumns() {
 		setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		getColumns().forEach(column -> {
 			Text text = new Text(column.getText());

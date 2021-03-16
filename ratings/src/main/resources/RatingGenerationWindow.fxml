@@ -13,11 +13,11 @@
 	</padding>
 
 	<Label fx:id="documentName" style="-fx-font-size: 18px;"/>
-	<Label text="Виберіть дві групи"/>
+	<Label fx:id="label"/>
 
 	<FlowPane fx:id="checkBoxesPane" alignment="CENTER" hgap="0" orientation="vertical" vgap="5" />
 
-	<Button fx:id="button" onAction="#onButtonClick" text="Сформувати рейтинг" disable="true">
+	<Button fx:id="button" onAction="#onButtonClick" disable="true">
 		<cursor>
 			<Cursor fx:constant="HAND" />
 		</cursor>

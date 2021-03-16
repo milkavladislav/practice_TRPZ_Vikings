@@ -24,7 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 
 import javafx.util.Callback;
-
+import ratings.alerts.Alert;
 import ratings.alerts.ErrorAlert;
 import ratings.document.table.tableview.Table;
 import ratings.document.table.xlsx.WorksheetsParser.TableItem;
@@ -77,7 +77,6 @@ public class ImportTable extends Table<List<String>> {
 			}
 
 			temp.getColumns().add(col);
-
 			if (!getColumns().contains(temp)) {
 				getColumns().add(temp);
 			}
@@ -122,6 +121,35 @@ public class ImportTable extends Table<List<String>> {
 		    return true;
 		});
 	}
+
+    private TableColumn<List<String>, String> createColumn(int index, String columnHeader) {
+    	return new TableColumn<List<String>, String>(columnHeader) {{
+    		setMinWidth(25);
+    		setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(index).toString()));
+
+    		if (index != 0) {
+	    		setCellFactory(TextFieldTableCell.<List<String>>forTableColumn());
+	    		setEditable(true);
+	    		setOnEditCommit(e -> {
+	    			List<String> row = e.getTableView().getItems().get(e.getTablePosition().getRow());
+
+					if (index > 1) {
+						if (isScore(e.getNewValue())) {
+							row.set(e.getTablePosition().getColumn(), e.getNewValue());
+						} else {
+							Alert.show("Увага!", "Помилка при введенні поля " + columnHeader,
+									"Поле може приймати значення в діапазоні [0, 12]");
+						}
+					} else {
+						row.set(e.getTablePosition().getColumn(), e.getNewValue());
+					}
+
+	    			refresh();
+					autoResizeColumns();
+	    		});
+    		}
+    	}};
+    }
 
 	private void setRowFactory() {
 		setRowFactory(new Callback<TableView<List<String>>, TableRow<List<String>>>() {
@@ -220,19 +248,6 @@ public class ImportTable extends Table<List<String>> {
 			}
 		});
 	}
-
-    private TableColumn<List<String>, String> createColumn(int index, String columnHeader) {
-    	return new TableColumn<List<String>, String>(columnHeader) {{
-    		setCellFactory(TextFieldTableCell.<List<String>>forTableColumn());
-    		setMinWidth(25);
-    		setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(index).toString()));
-    		setEditable(true);
-    		setOnEditCommit(e -> {
-    			List<String> row = e.getTableView().getItems().get(e.getTablePosition().getRow());
-    			row.set(e.getTablePosition().getColumn(), e.getNewValue());
-    		});
-    	}};
-    }
 
     public float getAverageScoreByRow(List<String> row) {
     	// получаем индексы колонок, которые попадают под подсчет

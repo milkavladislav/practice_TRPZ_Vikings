@@ -144,12 +144,12 @@ public class Controller implements Initializable {
 			if (data == null)
 				data = new DocumentsData();
 
+			data.setTheme();
+
 			if (saveChanges) {
 				data.saveAllDocuments();
 				data.setTabs(tabPane.getTabs(), tabPane.getSelectionModel().getSelectedItem());
 			}
-
-			data.setTheme();
 
 			oos.writeObject(data);
 			oos.flush();
@@ -579,6 +579,10 @@ public class Controller implements Initializable {
 				new Thread(() -> saveApp(true)).start();
 
 				Alert.show("Інформація", "Зміни збережено", "");
+			}),
+			createInstrumentsButton("users", "Сформувати рейтинг", false, e -> {
+				documents.setGenerateRatingDocument(null);
+				RatingGenerationWindow.show();
 			}),
 			createInstrumentsButton("sort", "Сортувати таблицю", true, e -> {
 				if (openTable != null) {

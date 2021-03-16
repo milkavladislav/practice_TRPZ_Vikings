@@ -22,6 +22,7 @@ import javafx.scene.control.Label;
 
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+
 import ratings.alerts.Alert;
 import ratings.document.Document;
 import ratings.document.DocumentsManager;
@@ -49,6 +50,9 @@ public class RatingGenerationController implements Initializable {
 	@FXML
 	private Button button;
 
+	@FXML
+	private Label label;
+
 	private List<CheckBox> checkBoxes = new ArrayList<>();
 	private int selectedCheckBoxes;
 
@@ -58,20 +62,30 @@ public class RatingGenerationController implements Initializable {
 
 	@FXML
 	public void onButtonClick() {
-		if (selectedTables.getKey().getBoldRows().isEmpty() &&
-			selectedTables.getValue().getBoldRows().isEmpty()) {
+		if (documents.getGenerateRatingDocument() != null) {
+			if (selectedTables.getKey().getBoldRows().isEmpty() &&
+				selectedTables.getValue().getBoldRows().isEmpty()) {
 
-			Alert.show("Інформація", "Увага!", "Виділіть бюджетників");
+				Alert.show("Інформація", "Увага!", "Виділіть бюджетників");
+			} else {
+				Document doc = documents.getGenerateRatingDocument();
+				Table<?> table = new RatingTable(getTableName(), prepareTableItems());
+
+				doc.addTable(table);
+				documents.getController().addTable(table);
+			}
+
+			Window window = button.getScene().getWindow();
+			window.hide();
 		} else {
-			Document doc = documents.getGenerateRatingDocument();
-			Table<?> table = new RatingTable(getTableName(), prepareTableItems());
-
-			doc.addTable(table);
-			documents.getController().addTable(table);
+			for (CheckBox check : checkBoxes) {
+				if (check.isSelected()) {
+					documents.setGenerateRatingDocument(documents.getDocument(check.getText()));
+					break;
+				}
+			}
+			selectTables();
 		}
-
-		Window window = button.getScene().getWindow();
-		window.hide();
 	}
 
 	private static class Item {
@@ -164,37 +178,77 @@ public class RatingGenerationController implements Initializable {
 		}
 	}
 
-	private void onCheckBoxClick(CheckBox check) {
+	private void onCheckBoxClick(CheckBox check, int limit) {
 		selectedCheckBoxes = check.isSelected() ? selectedCheckBoxes + 1 : selectedCheckBoxes - 1;
 		for (CheckBox checkBox : checkBoxes) {
-			if (selectedCheckBoxes == 2) {
+			if (selectedCheckBoxes == limit) {
 				if (!checkBox.isSelected()) {
 					checkBox.setDisable(true);
 				}
-				setSelectedTables();
+
+				if (documents.getGenerateRatingDocument() != null)
+					setSelectedTables();
 			} else {
 				checkBox.setDisable(false);
 			}
 		}
 
-		button.setDisable(selectedCheckBoxes != 2);
+		button.setDisable(selectedCheckBoxes != limit);
 	}
 
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
+	private void selectTables() {
 		Document doc = documents.getGenerateRatingDocument();
 		documentName.setText(doc.getName());
+
+		label.setText("Виберіть дві групи");
+		button.setText("Сформувати рейтинг");
+
+		selectedCheckBoxes = 0;
+		checkBoxes.clear();
+		checkBoxesPane.getChildren().clear();
 
 		for (Table<?> table : doc) {
 			if (table instanceof ImportTable) {
 				CheckBox check = new CheckBox(table.getTableName());
 
 				check.setCursor(Cursor.HAND);
-				check.setOnAction(e -> onCheckBoxClick(check));
+				check.setOnAction(e -> onCheckBoxClick(check, 2));
 
 				checkBoxes.add(check);
 				checkBoxesPane.getChildren().add(check);
 			}
+		}
+	}
+
+	private void selectGroup() {
+		documentName.setText("");
+
+		label.setText("Виберіть документ");
+		button.setText("Далі");
+
+		selectedCheckBoxes = 0;
+		checkBoxes.clear();
+		checkBoxesPane.getChildren().clear();
+
+		for (Document document : documents) {
+			CheckBox check = new CheckBox(document.getName());
+
+			check.setCursor(Cursor.HAND);
+			check.setOnAction(e -> onCheckBoxClick(check, 1));
+
+			checkBoxes.add(check);
+			checkBoxesPane.getChildren().add(check);
+		}
+	}
+
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		Document doc = documents.getGenerateRatingDocument();
+
+		if (doc != null) {
+			selectTables();
+		} else {
+			selectGroup();
 		}
 	}
 }
