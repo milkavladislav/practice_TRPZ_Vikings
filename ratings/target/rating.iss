@@ -56,7 +56,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "C:\Users\COLDBEATZ\workspace\ratings\target\Рейтинг.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Прилагающиеся ресурсы
-;Source: "E:\work\Mirami\Mirami\bin\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+;Source: "C:\Users\COLDBEATZ\workspace\ratings\target\installer-resources\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 
