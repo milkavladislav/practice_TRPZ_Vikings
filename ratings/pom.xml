@@ -88,7 +88,8 @@
                     			<mainClass>ratings.Main</mainClass>
                 			</classPath>
                 			<jre>
-                    			<minVersion>1.8.0</minVersion>
+								<path>jre/</path>
+                    			<!-- <minVersion>1.8.0</minVersion> -->
                 			</jre>
                 			<versionInfo>
                     			<fileVersion>1.0.0.0</fileVersion>
