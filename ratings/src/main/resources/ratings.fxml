@@ -26,6 +26,13 @@
 						<MenuItem text="Вихід" onAction="#onClickExit"/>
 					</items>
 				</Menu>
+				<Menu text="Інформація">
+					<items>
+						<MenuItem text="Інформація про продукт" onAction="#onClickDevList"/>
+						<SeparatorMenuItem />
+						<MenuItem text="Довідка по використанню" onAction="#onClickReadme"/>
+					</items>
+				</Menu>
 			</menus>
     	</MenuBar>
     </top>
