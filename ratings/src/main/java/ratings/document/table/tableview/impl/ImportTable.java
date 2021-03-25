@@ -249,6 +249,13 @@ public class ImportTable extends Table<List<String>> {
 		});
 	}
 
+	/**
+	 * Считает средний бал по строке.
+	 * Если в оценках есть 2 или 1 - не попадает в рейтинг.
+	 * 
+	 * @param row строка
+	 * @return средний бал
+	 */
     public float getAverageScoreByRow(List<String> row) {
     	// получаем индексы колонок, которые попадают под подсчет
     	// пропускаем колонки с 12-ти бальными оценкамаи
@@ -267,7 +274,7 @@ public class ImportTable extends Table<List<String>> {
     					ErrorAlert.show("Table Exception",
     							"Неможливо порахувати середній бал. " +
     							"Перевірте правильність введення даних в .xlsx");
-    					return 0;
+    					return -1;
     				}
 
     				if (nextCol.getId().isEmpty()) {
@@ -284,11 +291,22 @@ public class ImportTable extends Table<List<String>> {
     	}
 
     	float averageScore = 0;
+    	int scores = 0;
     	for (int i : indexes) {
-    		averageScore += NumberUtils.getInteger(row.get(i));
+    		String value = row.get(i);
+    		
+    		if (value.equalsIgnoreCase("зар"))
+    			continue;
+    		
+    		int score = NumberUtils.getInteger(row.get(i));
+    		if (score == 2 || score == 1)
+    			return -1;
+    		
+    		averageScore += score;
+    		scores++;
     	}
 
-    	return NumberUtils.toFixed(averageScore / indexes.size(), 4);
+    	return NumberUtils.toFixed(averageScore / scores, 4);
     }
 
     @Override

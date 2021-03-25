@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.StringJoiner;
 
 import com.jfoenix.controls.JFXButton;
 
@@ -69,6 +70,8 @@ import ratings.themes.ThemeType;
 
 public class Controller implements Initializable {
 
+	private static final String README_FILE_NAME = "readme.html";
+
 	private final ExtensionFilter xlsxFilter = new ExtensionFilter("XLSX файл (*.xlsx)", "*.xlsx");
 	private final ExtensionFilter pdfFilter = new ExtensionFilter("PDF файл (*.pdf)", "*.pdf");
 
@@ -102,8 +105,12 @@ public class Controller implements Initializable {
 
 	public Controller() {
 		Platform.runLater(() -> {
-			readSaveDocuments();
-			ThemeManager.initStylesgeets();
+			try {
+				readSaveDocuments();
+				ThemeManager.initStylesgeets();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 			Main.getPrimaryStage().setOnCloseRequest(e -> {
 				boolean saveChanges = Alert.showConfirmAlert("Увага", "Зберегти зміни?", "");
@@ -120,10 +127,12 @@ public class Controller implements Initializable {
 		tabPane.setOnMouseClicked(e -> openSelectTabTable());
 	}
 
-	private void readSaveDocuments() {
+	private void readSaveDocuments() throws IOException {
 		File file = new File(DocumentsData.OBJECT_FILE_NAME);
-		if (!file.exists())
+		if (!file.exists()) {
+			saveApp(false);
 			return;
+		}
 
 		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DocumentsData.OBJECT_FILE_NAME))) {
 			data = (DocumentsData) ois.readObject();
@@ -691,5 +700,27 @@ public class Controller implements Initializable {
 		saveApp(saveChanges);
 
 		System.exit(-1);
+	}
+
+	@FXML
+	private void onClickDevList() {
+		StringJoiner joiner = new StringJoiner("\n");
+
+		joiner.add("Владислав Гриценко");
+		joiner.add("Владислав Мілька");
+		joiner.add("Роман Клименко");
+		joiner.add("Артем Катрущенко");
+		joiner.add("Валерій Шипа");
+
+		Alert.show("Інформація", "«Вікінги» – 2021", joiner.toString());
+	}
+
+	@FXML
+	private void onClickReadme() {
+		try {
+			Runtime.getRuntime().exec("cmd /c start " + README_FILE_NAME);
+		} catch (IOException e) {
+			ErrorAlert.show(e);
+		}
 	}
 }
