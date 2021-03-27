@@ -33,7 +33,7 @@ OutputDir=C:\Users\COLDBEATZ\workspace\ratings\target
 OutputBaseFileName=rating-setup
 
 ; Файл иконки
-SetupIconFile=C:\Users\COLDBEATZ\workspace\ratings\src\main\resources\icon.ico
+SetupIconFile=installer-resources\readme-images\icon.ico
 
 ; Параметры сжатия
 Compression=lzma
@@ -52,11 +52,13 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 
+Source: "installer-resources\readme.html"; DestDir: "{app}"; Flags: isreadme 
+
 ; Исполняемый файл
-Source: "C:\Users\COLDBEATZ\workspace\ratings\target\Рейтинг.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Рейтинг.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Прилагающиеся ресурсы
-Source: "C:\Users\COLDBEATZ\workspace\ratings\target\installer-resources\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "installer-resources\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 

@@ -6,7 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
 import java.net.URL;
+
 import java.util.ResourceBundle;
 import java.util.StringJoiner;
 
@@ -65,6 +67,7 @@ import ratings.document.serialize.data.TabData;
 import ratings.document.table.tableview.Table;
 import ratings.document.table.tableview.impl.ImportTable;
 import ratings.document.table.tableview.impl.rating.RatingTable;
+
 import ratings.themes.ThemeManager;
 import ratings.themes.ThemeType;
 
@@ -191,7 +194,6 @@ public class Controller implements Initializable {
 	}
 
 	private void setButtonsDisable() {
-
 		for (JFXButton button : buttons) {
 			switch (button.getId()) {
 				case "pdf-file-format-symbol":
@@ -199,10 +201,12 @@ public class Controller implements Initializable {
 					button.setDisable(openTable == null || openTable instanceof ImportTable);
 					break;
 				case "sort":
-				case "add-user":
 					button.setDisable(openTable == null);
 					break;
-
+				case "add-user":
+					// добавление строк нужно только таблице ImportTable
+					button.setDisable(openTable == null || openTable instanceof RatingTable);
+					break;
 			}
 		}
 	}
