@@ -37,6 +37,9 @@ public class DocumentsData implements Serializable {
 	private ThemeType themeType = ThemeType.DEFAULT;
 
 	private DocumentData parseDocument(Document doc) {
+		if (doc.tablesCount() == 0)
+			return null;
+
 		TableData[] tables = new TableData[doc.tablesCount()];
 
 		int i = 0;
